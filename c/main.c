@@ -14,13 +14,6 @@
  * limitations under the License.
  */
 
-/****
-  This is the default custom.c file defining main, which must be present
-  in order to build an executable file.
-
-  See the file custom/sample.c for a customized variant of this file.
-****/
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -66,7 +59,28 @@ static const char *path_last(const char *p) {
   return p;
 }
 
+#ifdef WIN32
+#include <windows.h>
+
+static char* to_utf8(wchar_t* arg) {
+  int len = WideCharToMultiByte(CP_UTF8, 0, arg, -1, NULL, 0, NULL, NULL);
+  if (0 == len) {
+    fwprintf_s(stderr, L"Invalid argument: %s\n", arg);
+    exit(1);
+  }
+  char* arg8 = (char*)malloc(len * sizeof(char));
+  WideCharToMultiByte(CP_UTF8, 0, arg, -1, arg8, len, NULL, NULL);
+  return arg8;
+}
+
+int wmain(int argc, wchar_t* wargv[], wchar_t* wenvp[]) {
+  const char** argv = (char**)malloc((argc + 1) * sizeof(char*));
+  for (int i = 0; i < argc; i++)
+    argv[i] = to_utf8(wargv[i]);
+  argv[argc] = NULL;
+#else /* WIN32 */
 int main(int argc, const char *argv[]) {
+#endif /* WIN32 */
   int n, new_argc = 1;
 #ifdef SAVEDHEAPS
   int compact = 1, savefile_level = 0;
