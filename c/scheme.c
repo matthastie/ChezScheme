@@ -561,7 +561,11 @@ static IBOOL find_boot(name, ext, errorp) const char *name, *ext; IBOOL errorp; 
   char pathbuf[PATH_MAX], buf[PATH_MAX];
   uptr n; INT c;
   const char *path;
+#ifdef WIN32
+  wchar_t *expandedpath;
+#else
   char *expandedpath;
+#endif
   gzFile file;
 
   if (S_fixedpathp(name)) {
@@ -572,8 +576,13 @@ static IBOOL find_boot(name, ext, errorp) const char *name, *ext; IBOOL errorp; 
 
     path = name;
 
+#ifdef WIN32
+    expandedpath = S_malloc_wide_pathname(path);
+    file = gzopen_w(expandedpath, "rb");
+#else
     expandedpath = S_malloc_pathname(path);
     file = gzopen(expandedpath, "rb");
+#endif
     /* assumption (seemingly true based on a glance at the source code):
        gzopen doesn't squirrel away a pointer to expandedpath. */
     free(expandedpath);
@@ -647,8 +656,13 @@ static IBOOL find_boot(name, ext, errorp) const char *name, *ext; IBOOL errorp; 
         }
       }
 
+#ifdef WIN32
+      expandedpath = S_malloc_wide_pathname(path);
+      file = gzopen_w(expandedpath, "rb");
+#else
       expandedpath = S_malloc_pathname(path);
       file = gzopen(expandedpath, "rb");
+#endif
       /* assumption (seemingly true based on a glance at the source code):
          gzopen doesn't squirrel away a pointer to expandedpath. */
       free(expandedpath);
