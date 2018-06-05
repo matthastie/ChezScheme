@@ -1331,32 +1331,19 @@ static ptr s_getenv PROTO((char *name));
 
 static ptr s_getenv(name) char *name; {
 #ifdef WIN32
-#define GETENVBUFSIZ 100
-  char buf[GETENVBUFSIZ];
-  size_t n;
-
-  n = GetEnvironmentVariable(name, buf, GETENVBUFSIZ);
-  if (n > GETENVBUFSIZ) {
-    ptr bv = S_bytevector(n);
-    n = GetEnvironmentVariable(name, &BVIT(bv,0), (DWORD)n);
-    if (n != 0) return S_string(&BVIT(bv,0), n);
-  } else if (n > 0) {
-    return S_string(buf, n);
-  }
-
-  if (getenv_s(&n, buf, GETENVBUFSIZ, name) == 0) {
-    if (n != 0) return S_string(buf, n-1);
-  } else {
-    ptr bv = S_bytevector(n);
-    if (getenv_s(&n, &BVIT(bv,0), n, name) == 0)
-      if (n != 0) return S_string(&BVIT(bv,0), n-1);
-  }
-
-  return Sfalse;
+  char *s = Sgetenv(name);
 #else /* WIN32 */
   char *s = getenv(name);
-  return s == (char *)0 ? Sfalse : S_string(s, -1);
 #endif /* WIN32 */
+  if (s == (char *)0)
+    return Sfalse;
+  else {
+    ptr r = Sstring_utf8(s, -1);
+#ifdef WIN32
+    free(s);
+#endif
+    return r;
+  }
 }
 
 static void s_putenv PROTO((char *name, char *value));

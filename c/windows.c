@@ -474,3 +474,53 @@ char *S_windows_getcwd(char *buffer, int maxlen) {
   } else
     return buffer;
 }
+
+char *Swide_to_utf8(const wchar_t *arg) {
+  int len = WideCharToMultiByte(CP_UTF8, 0, arg, -1, NULL, 0, NULL, NULL);
+  if (0 == len) return NULL;
+  char* arg8 = (char*)malloc(len * sizeof(char));
+  if (0 == WideCharToMultiByte(CP_UTF8, 0, arg, -1, arg8, len, NULL, NULL)) {
+    free(arg8);
+    return NULL;
+  }
+  return arg8;
+}
+
+wchar_t *Sutf8_to_wide(const char *arg) {
+  int len = MultiByteToWideChar(CP_UTF8, 0, arg, -1, NULL, 0);
+  if (0 == len) return NULL;
+  wchar_t* argw = (wchar_t*)malloc(len * sizeof(wchar_t));
+  if (0 == MultiByteToWideChar(CP_UTF8, 0, arg, -1, argw, len)) {
+    free(argw);
+    return NULL;
+  }
+  return argw;
+}
+
+char *Sgetenv(const char *name) {
+  wchar_t* wname;
+  DWORD n;
+  wchar_t buffer[256];
+  wname = Sutf8_to_wide(name);
+  if (NULL == wname) return NULL;
+  n = GetEnvironmentVariableW(wname, buffer, 256);
+  if (n == 0) {
+    free(wname);
+    return NULL;
+  } else if (n <= 256) {
+    free(wname);
+    return Swide_to_utf8(buffer);
+  } else {
+    wchar_t* value = (wchar_t*)malloc(n * sizeof(wchar_t));
+    if (0 == GetEnvironmentVariableW(wname, value, n)) {
+      free(wname);
+      free(value);
+      return NULL;
+    } else {
+      char* result = Swide_to_utf8(value);
+      free(wname);
+      free(value);
+      return result;
+    }
+  }
+}

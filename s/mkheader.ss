@@ -389,6 +389,14 @@
           (export "int" "Sdestroy_thread" "(void)")
         )
 
+        (when-feature windows
+        (nl) (comment "Windows support.")
+          (pr "#include <wchar.h>~%")
+          (export "char *" "Sgetenv" "(const char *)")
+          (export "wchar_t *" "Sutf8_to_wide" "(const char *)")
+          (export "char *" "Swide_to_utf8" "(const wchar_t *)")
+        )
+
         (nl) (comment "Features.")
         (for-each
           (lambda (x) (pr "#define FEATURE_~@:(~a~)~%" (sanitize x)))

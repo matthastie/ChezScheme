@@ -193,6 +193,12 @@ EXPORT int Sscheme_script PROTO((const char *, int, const char *[]));
 EXPORT int Sscheme_program PROTO((const char *, int, const char *[]));
 EXPORT void Sscheme_deinit PROTO((void));
 
+/* Windows support. */
+#include <wchar.h>
+EXPORT char * Sgetenv PROTO((const char *));
+EXPORT wchar_t * Sutf8_to_wide PROTO((const char *));
+EXPORT char * Swide_to_utf8 PROTO((const wchar_t *));
+
 /* Features. */
 #define FEATURE_ICONV
 #define FEATURE_EXPEDITOR

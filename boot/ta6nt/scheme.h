@@ -198,6 +198,12 @@ EXPORT int Sactivate_thread PROTO((void));
 EXPORT void Sdeactivate_thread PROTO((void));
 EXPORT int Sdestroy_thread PROTO((void));
 
+/* Windows support. */
+#include <wchar.h>
+EXPORT char * Sgetenv PROTO((const char *));
+EXPORT wchar_t * Sutf8_to_wide PROTO((const char *));
+EXPORT char * Swide_to_utf8 PROTO((const wchar_t *));
+
 /* Features. */
 #define FEATURE_ICONV
 #define FEATURE_EXPEDITOR
